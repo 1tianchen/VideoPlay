@@ -19,7 +19,7 @@ int main()
 	const char* argv[2]{};
 	argv[0] = "--ignore-config";//忽略全局配置
 	libvlc_instance_t* vlc_ins = libvlc_new(argc, argv);
-	std::string path = Unicode2Utf8(L"测试视频.mp4");
+	std::string path = Unicode2Utf8(L"D:\\学习视频\\BaiduNetdiskDownload\\13移动打车项目\\01-java基础\\01-java基础\\3-视频\\4-java语言的值传递和引用传递_.mp4");
 	libvlc_media_t* media = libvlc_media_new_path(vlc_ins, path.c_str());
 	//2  media = libvlc_media_new_location(vlc_ins, "file:///D:\\VS2019code\\Test\\Debug\\测试视频.mp4");
 	libvlc_media_player_t* player = libvlc_media_player_new_from_media(media);

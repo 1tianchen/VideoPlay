@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Video_demo", "Video_demo\Video_demo.vcxproj", "{74BD42F0-EA55-4E3D-B738-3FBCF5FE6F87}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VideoClinet", "VideoClinet\VideoClinet.vcxproj", "{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{74BD42F0-EA55-4E3D-B738-3FBCF5FE6F87}.Release|x64.Build.0 = Release|x64
 		{74BD42F0-EA55-4E3D-B738-3FBCF5FE6F87}.Release|x86.ActiveCfg = Release|Win32
 		{74BD42F0-EA55-4E3D-B738-3FBCF5FE6F87}.Release|x86.Build.0 = Release|Win32
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Debug|x64.ActiveCfg = Debug|x64
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Debug|x64.Build.0 = Debug|x64
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Debug|x86.ActiveCfg = Debug|Win32
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Debug|x86.Build.0 = Debug|Win32
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Release|x64.ActiveCfg = Release|x64
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Release|x64.Build.0 = Release|x64
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Release|x86.ActiveCfg = Release|Win32
+		{BDD003EC-2CEC-4AA6-8688-DA8A2804C8A2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
