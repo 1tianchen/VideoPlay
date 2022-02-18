@@ -11,6 +11,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include <string>
 
 
 // CVideoClinetDlg 对话框
@@ -26,11 +27,25 @@ CVideoClinetDlg::CVideoClinetDlg(CWnd* pParent /*=nullptr*/)
 void CVideoClinetDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_EDIT_PLAY, m_video);
+	DDX_Control(pDX, IDC_SLIDER_POS, m_pos);
+	DDX_Control(pDX, IDC_SLIDER_VOLUME, m_volume);
+	DDX_Control(pDX, IDC_EDIT_URL, m_url);
+	DDX_Control(pDX, IDC_BTN_PLAY, m_btnPlay);
 }
 
 BEGIN_MESSAGE_MAP(CVideoClinetDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_WM_TIMER()
+	ON_WM_DESTROY()
+	ON_WM_DROPFILES()
+	ON_BN_CLICKED(IDC_BTN_PLAY, &CVideoClinetDlg::OnBnClickedBtnPlay)
+	ON_BN_CLICKED(IDC_BTN_STOP, &CVideoClinetDlg::OnBnClickedBtnStop)
+	ON_NOTIFY(TRBN_THUMBPOSCHANGING, IDC_SLIDER_POS, &CVideoClinetDlg::OnTRBNThumbPosChangingSliderPos)
+	ON_NOTIFY(TRBN_THUMBPOSCHANGING, IDC_SLIDER_VOLUME, &CVideoClinetDlg::OnTRBNThumbPosChangingSliderVolume)
+	ON_WM_HSCROLL()
+	ON_WM_VSCROLL()
 END_MESSAGE_MAP()
 
 
@@ -46,7 +61,11 @@ BOOL CVideoClinetDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
+	SetTimer(0, 500, NULL);
+	m_pos.SetRange(0, 100);
+	m_volume.SetRange(0, 100);
+	m_volume.SetTicFreq(20);
+	m_volume.SetPos(100);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -86,3 +105,129 @@ HCURSOR CVideoClinetDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CVideoClinetDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	if (nIDEvent == 0)
+	{
+		//获取播放状态,进度信息
+		//更新音量 IDC_STATIC_VOLUME
+		//IDC_STATIC_TIME 更新播放时间
+	}
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void CVideoClinetDlg::OnDestroy()
+{
+	CDialogEx::OnDestroy();
+	KillTimer(0);
+	// TODO: 在此处添加消息处理程序代码
+}
+
+
+void CVideoClinetDlg::OnDropFiles(HDROP hDropInfo)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	CDialogEx::OnDropFiles(hDropInfo);
+
+
+	WIN32_FIND_DATAA wfd;
+	std::string strFileName;
+	char  Buffer[MAX_PATH];
+	int nCounts = DragQueryFileA(hDropInfo, 0xFFFFFFFF, NULL, 0);
+	if (nCounts == 1)
+	{
+		//TODO 记得转码
+		DragQueryFileA(hDropInfo, 0, Buffer, MAX_PATH);
+		FindClose(FindFirstFileA(Buffer, &wfd));
+	}
+	else if (nCounts > 1)
+	{
+		AfxMessageBox(L"暂时处理不了这么多文件");
+	}
+	//TODO:Controller的播放接口
+
+}
+
+
+void CVideoClinetDlg::OnBnClickedBtnPlay()
+{
+	if (status == false)
+	{
+		m_btnPlay.SetWindowTextW(L"暂停");
+		status = true;
+		//TODO:Controller的播放接口
+	}
+	else
+	{
+		m_btnPlay.SetWindowTextW(L"播放");
+		status = false;
+		//TODO:Controller的暂停接口
+
+	}
+}
+
+
+void CVideoClinetDlg::OnBnClickedBtnStop()
+{
+	m_btnPlay.SetWindowTextW(L"播放");
+	status = false;
+	//TODO:Controller的Stop接口
+}
+
+
+void CVideoClinetDlg::OnTRBNThumbPosChangingSliderPos(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// 此功能要求 Windows Vista 或更高版本。
+	// _WIN32_WINNT 符号必须 >= 0x0600。
+	NMTRBTHUMBPOSCHANGING* pNMTPC = reinterpret_cast<NMTRBTHUMBPOSCHANGING*>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	TRACE("pos %d reason %d\r\n", pNMTPC->dwPos, pNMTPC->nReason);
+	AfxMessageBox(L"cc");
+}
+
+
+void CVideoClinetDlg::OnTRBNThumbPosChangingSliderVolume(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	// 此功能要求 Windows Vista 或更高版本。
+	// _WIN32_WINNT 符号必须 >= 0x0600。
+	NMTRBTHUMBPOSCHANGING* pNMTPC = reinterpret_cast<NMTRBTHUMBPOSCHANGING*>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	TRACE("pos %d reason %d\r\n", pNMTPC->dwPos, pNMTPC->nReason);
+	AfxMessageBox(L"cc");
+}
+
+
+void CVideoClinetDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	if (nSBCode == 5)
+	{
+		TRACE("pos %p volume %p cur %p pos %d nSBcod %d \r\n", &m_pos, &m_volume, pScrollBar, nPos, nSBCode);
+		if ((unsigned)&m_pos == (unsigned)pScrollBar)//播放时间
+		{
+			CString strVolume{};
+			strVolume.Format(_T("%d%%"), nPos);
+			SetDlgItemText(IDC_STATIC_TIME, strVolume);
+		}
+		else//声音
+		{
+			CString strVolume{};
+			strVolume.Format(_T("%d%%"), nPos);
+			SetDlgItemText(IDC_STATIC_VOLUME, strVolume);
+		}
+	}
+	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CVideoClinetDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+
+	CDialogEx::OnVScroll(nSBCode, nPos, pScrollBar);
+}
