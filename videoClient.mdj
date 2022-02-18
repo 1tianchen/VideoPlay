@@ -1,0 +1,19 @@
+{
+	"_type": "Project",
+	"_id": "AAAAAAFF+h6SjaM2Hec=",
+	"name": "VideoClient",
+	"ownedElements": [
+		{
+			"_type": "UMLPackage",
+			"_id": "AAAAAAF/C5B/CiFV7H0=",
+			"_parent": {
+				"$ref": "AAAAAAFF+h6SjaM2Hec="
+			},
+			"name": "VideoClient"
+		}
+	],
+	"author": "tianchen",
+	"company": "hello wolrd",
+	"copyright": "2022-2077",
+	"version": "0.1"
+}
