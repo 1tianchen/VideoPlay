@@ -207,18 +207,17 @@ void CVideoClinetDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	if (nSBCode == 5)
 	{
+		CString strPosition{};
 		TRACE("pos %p volume %p cur %p pos %d nSBcod %d \r\n", &m_pos, &m_volume, pScrollBar, nPos, nSBCode);
 		if ((unsigned)&m_pos == (unsigned)pScrollBar)//播放时间
 		{
-			CString strVolume{};
-			strVolume.Format(_T("%d%%"), nPos);
-			SetDlgItemText(IDC_STATIC_TIME, strVolume);
-		}
+			strPosition.Format(_T("%d%%"), nPos);
+			SetDlgItemText(IDC_STATIC_TIME, strPosition);
+					}
 		else//声音
 		{
-			CString strVolume{};
-			strVolume.Format(_T("%d%%"), nPos);
-			SetDlgItemText(IDC_STATIC_VOLUME, strVolume);
+			strPosition.Format(_T("%d%%"), nPos);
+			SetDlgItemText(IDC_STATIC_VOLUME, strPosition);
 		}
 	}
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
