@@ -34,7 +34,9 @@ public:
 	~VLCTOOL();
 	//strUrl 请传入 utf-8的编码格式
 	int SetMedia(const std::string& strUrl);
+#ifdef WIN32
 	int SetHwnd(HWND hWnd);
+#endif // WIN32
 	int Play();
 	int Pause();
 	int Stop();
@@ -42,9 +44,16 @@ public:
 	int SetPostion(float pos);
 	int GetVolume();
 	int SetVolume(int volume);
-	VlcSize GetMediaInfo();
+	float GetLength();
+	VlcSize GetMediaInfomation();
+	std::string Unicode2Utf8(const std::wstring& strIn);
 protected:
-	libvlc_instance_t* m_instance;
-	libvlc_media_t* m_media;
-	libvlc_media_player_t* m_player;
+	libvlc_instance_t* m_instance{};
+	libvlc_media_t* m_media{};
+	libvlc_media_player_t* m_player{};
+	std::string m_Strurl;
+#ifdef WIN32
+	HWND m_hwnd;
+#endif // WIN32
+
 };

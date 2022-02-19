@@ -4,6 +4,7 @@
 
 #pragma once
 
+class VideoClientController;
 
 // CVideoClinetDlg 对话框
 class CVideoClinetDlg : public CDialogEx
@@ -33,21 +34,25 @@ protected:
 public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
-	CEdit m_video;
-	CSliderCtrl m_pos;
-	CSliderCtrl m_volume;
-	CEdit m_url;
 	afx_msg void OnDropFiles(HDROP hDropInfo);
 	afx_msg void OnBnClickedBtnPlay();
-	CButton m_btnPlay;
 
 public:
-	//播放状态
-	 bool status = false;
-
 	 afx_msg void OnBnClickedBtnStop();
 	 afx_msg void OnTRBNThumbPosChangingSliderPos(NMHDR* pNMHDR, LRESULT* pResult);
 	 afx_msg void OnTRBNThumbPosChangingSliderVolume(NMHDR* pNMHDR, LRESULT* pResult);
 	 afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	 afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+protected:
+	//播放状态
+	bool status = false;
+	CButton m_btnPlay;
+	CEdit m_video;
+	CSliderCtrl m_pos;
+	CSliderCtrl m_volume;
+	CEdit m_url;
+	float m_video_length{};
+public:
+	VideoClientController* m_controller;
+	afx_msg void OnBnClickedBtnOpemfile();
 };

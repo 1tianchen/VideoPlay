@@ -7,7 +7,7 @@
 #include "VideoClinet.h"
 #include "VideoClinetDlg.h"
 #include "afxdialogex.h"
-
+#include "VideoClientController.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -15,8 +15,6 @@
 
 
 // CVideoClinetDlg 对话框
-
-
 
 CVideoClinetDlg::CVideoClinetDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_VIDEOCLINET_DIALOG, pParent)
@@ -46,6 +44,7 @@ BEGIN_MESSAGE_MAP(CVideoClinetDlg, CDialogEx)
 	ON_NOTIFY(TRBN_THUMBPOSCHANGING, IDC_SLIDER_VOLUME, &CVideoClinetDlg::OnTRBNThumbPosChangingSliderVolume)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
+	ON_BN_CLICKED(IDC_BTN_OPEMFILE, &CVideoClinetDlg::OnBnClickedBtnOpemfile)
 END_MESSAGE_MAP()
 
 
@@ -61,11 +60,14 @@ BOOL CVideoClinetDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	SetTimer(0, 500, NULL);
-	m_pos.SetRange(0, 100);
+	m_pos.SetRange(0, 1);
 	m_volume.SetRange(0, 100);
 	m_volume.SetTicFreq(20);
 	m_volume.SetPos(100);
+	SetTimer(0, 500, NULL);//因为是我们接管了 这个初始化  VLC在前面
+
+
+	m_controller->SetWnd(m_video.GetSafeHwnd()); //设置窗口 在构造的时候没有
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -112,8 +114,23 @@ void CVideoClinetDlg::OnTimer(UINT_PTR nIDEvent)
 	if (nIDEvent == 0)
 	{
 		//获取播放状态,进度信息
+		float pos = m_controller->VideoCtrl(VLCTOOL_GET_POSTION);
+		if (pos != -1.0f)
+		{//IDC_STATIC_TIME 更新播放时间
+			static float length = 0.0f;
+			length=m_controller->VideoCtrl(VLCTOOL_GET_LENGTH);
+			if (m_video_length !=length)
+			{
+				m_video_length = length;
+				m_pos.SetRange(0, int(length));
+			}
+			CString strPos;
+			strPos.Format(L"%f/%f", pos*length,length);
+			SetDlgItemText(IDC_STATIC_TIME, strPos);
+			m_pos.SetPos(int(length*pos));
+		}
 		//更新音量 IDC_STATIC_VOLUME
-		//IDC_STATIC_TIME 更新播放时间
+
 	}
 	CDialogEx::OnTimer(nIDEvent);
 }
@@ -132,24 +149,22 @@ void CVideoClinetDlg::OnDropFiles(HDROP hDropInfo)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 
 	CDialogEx::OnDropFiles(hDropInfo);
-
-
-	WIN32_FIND_DATAA wfd;
-	std::string strFileName;
-	char  Buffer[MAX_PATH];
-	int nCounts = DragQueryFileA(hDropInfo, 0xFFFFFFFF, NULL, 0);
+	WIN32_FIND_DATAW wfd;
+	CString Path;
+	wchar_t  Buffer[MAX_PATH];
+	int nCounts = DragQueryFileW(hDropInfo, 0xFFFFFFFF, NULL, 0);
 	if (nCounts == 1)
 	{
 		//TODO 记得转码
-		DragQueryFileA(hDropInfo, 0, Buffer, MAX_PATH);
-		FindClose(FindFirstFileA(Buffer, &wfd));
+		DragQueryFileW(hDropInfo, 0, Buffer, MAX_PATH);
+		FindClose(FindFirstFileW(Buffer, &wfd));
+		Path.Format(L"file:///%s", Buffer);
+		m_url.SetWindowTextW(Path);
 	}
 	else if (nCounts > 1)
 	{
 		AfxMessageBox(L"暂时处理不了这么多文件");
 	}
-	//TODO:Controller的播放接口
-
 }
 
 
@@ -157,16 +172,19 @@ void CVideoClinetDlg::OnBnClickedBtnPlay()
 {
 	if (status == false)
 	{
+		CString url;
+		m_url.GetWindowText(url);
+		//unicode to utf-8
+		m_controller->SetMedia(m_controller->Unicode2Utf8((LPCTSTR)url));
 		m_btnPlay.SetWindowTextW(L"暂停");
 		status = true;
-		//TODO:Controller的播放接口
+		m_controller->VideoCtrl(VLCTOOL_PLAY);
 	}
 	else
 	{
 		m_btnPlay.SetWindowTextW(L"播放");
 		status = false;
-		//TODO:Controller的暂停接口
-
+		m_controller->VideoCtrl(VLCTOOL_PAUSE);
 	}
 }
 
@@ -175,7 +193,7 @@ void CVideoClinetDlg::OnBnClickedBtnStop()
 {
 	m_btnPlay.SetWindowTextW(L"播放");
 	status = false;
-	//TODO:Controller的Stop接口
+	m_controller->VideoCtrl(VLCTOOL_STOP);
 }
 
 
@@ -213,11 +231,13 @@ void CVideoClinetDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		{
 			strPosition.Format(_T("%d%%"), nPos);
 			SetDlgItemText(IDC_STATIC_TIME, strPosition);
-					}
+			m_controller->SetPosition(float(nPos/m_video_length));
+		}
 		else//声音
 		{
 			strPosition.Format(_T("%d%%"), nPos);
 			SetDlgItemText(IDC_STATIC_VOLUME, strPosition);
+			m_controller->SetVolume(nPos);
 		}
 	}
 	CDialogEx::OnHScroll(nSBCode, nPos, pScrollBar);
@@ -229,4 +249,25 @@ void CVideoClinetDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 
 	CDialogEx::OnVScroll(nSBCode, nPos, pScrollBar);
+}
+
+
+void CVideoClinetDlg::OnBnClickedBtnOpemfile()
+{
+	TCHAR szFilters[] = _T("音频文件 (*.mp4)|*.mp4| 音频文件 (*.mp3)|*.mp3|  All Files (*.*)|*.*||");
+	CFileDialog dialog
+	(
+		TRUE,
+		NULL,//后缀 
+		NULL,//文件名
+		6,
+		szFilters//文件过滤器
+	);
+	CString tmp{};
+	if (dialog.DoModal() == IDOK)
+	{
+		tmp = dialog.GetPathName();
+		tmp.Format(L"file:///%s", tmp.GetBuffer());
+		m_url.SetWindowTextW(tmp);
+	}
 }

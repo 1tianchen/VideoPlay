@@ -36,6 +36,9 @@
     <ClInclude Include="VLCTOOL.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="VideoClientController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VideoClinet.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="VLCTOOL.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="VideoClientController.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
